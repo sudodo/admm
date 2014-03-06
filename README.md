@@ -7,7 +7,7 @@ of Multipliers (ADMM) algorithm [[1]](http://www.stanford.edu/~boyd/papers/admm_
 
 Details covering the implementation and statistical background are available in our
 [IEEE BigData 2013 paper](http://intentmedia.github.io/assets/2013-10-09-presenting-at-ieee-big-data/pld_js_ieee_bigdata_2013_admm.pdf)
-and our [presentation](http://intentmedia.github.io/2013/10/09/presenting-at-ieee-big-data/).
+and our [presentation](http://tech.intentmedia.com/post/68173521153/distributed-classification-with-admm).
 
 ADMM is a generic optimization algorithm.  This implementation includes a
 logistic regression objective function, however it can be extended to use other
