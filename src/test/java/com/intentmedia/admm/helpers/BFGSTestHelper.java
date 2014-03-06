@@ -17,7 +17,7 @@ public final class BFGSTestHelper {
             0.7306727562934296,
             0.260894417710139,
             -0.11847956322896916};
-    public static final double DELTA = 0;
+    public static final double DELTA = 0.000000000000001;
     public static final String BASE_PATH = "src/test/java/com/intentmedia/admm/files/";
     private static final String LABELS_FILE = BASE_PATH + "logreg_labels";
     private static final String FEATURES_FILE = BASE_PATH + "logreg_features";
