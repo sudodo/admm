@@ -36,7 +36,7 @@ public class AdmmResultWriterBetasTest {
         String expectedOutput = outputBuilder.toString();
 
         String jsonString =
-                "{\"0@s3n://intentmedia-hawk-output/peter/btl/output/HCLCModel-20130325202826/EXPEDIA/FLIGHTS/TRAINING/training_normalized.gz/part-m-00102.gz\":\"{\\\"a\\\":null,\\\"b\\\":null,\\\"uInitial\\\":[-0.06339187986530806],\\\"zInitial\\\":[" +
+                "{\"0@s3n://bucket/\":\"{\\\"a\\\":null,\\\"b\\\":null,\\\"uInitial\\\":[-0.06339187986530806],\\\"zInitial\\\":[" +
                         zBuilder.toString() +
                         "],\\\"rho\\\":32.0,\\\"lambdaValue\\\":0.0010000000474974513,\\\"primalObjectiveValue\\\":5728699.079705867,\\\"rNorm\\\":7.930098254024272,\\\"sNorm\\\":1.0488503599825136}\"}";
 
