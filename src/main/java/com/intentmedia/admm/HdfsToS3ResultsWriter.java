@@ -9,6 +9,7 @@ import org.apache.hadoop.mapred.JobConf;
 import java.io.IOException;
 
 public class HdfsToS3ResultsWriter {
+
     private JobConf conf;
     private Path hdfsDirectoryPath;
     private AdmmResultWriter admmResultWriter;

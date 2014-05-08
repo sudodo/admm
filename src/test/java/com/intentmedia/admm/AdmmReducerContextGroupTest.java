@@ -14,6 +14,7 @@ import static com.intentmedia.admm.AdmmIterationHelper.admmReducerContextToJson;
 import static org.junit.Assert.assertEquals;
 
 public class AdmmReducerContextGroupTest {
+
     private static final Pattern KEY_VALUE_DELIMITER = Pattern.compile("::");
     private static final int NUMBER_OF_REDUCER_CONTEXTS = 3;
     private static final double[] STATIC_DOUBLE_ARRAY = {1.0, 2.0, 3.0, 4.0};
@@ -22,24 +23,17 @@ public class AdmmReducerContextGroupTest {
 
     @Test
     public void testConstructor() throws Exception {
-        // initialize inputs
         Iterator<Text> mapperResults = getMapperResults();
 
-        // initialize mocks
-        // initialize subject
         AdmmReducerContextGroup admmReducerContextGroup =
                 new AdmmReducerContextGroup(mapperResults, NUMBER_OF_REDUCER_CONTEXTS, LOG, 0);
 
-        // invoke target
-        // assert
         assertEquals(admmReducerContextGroup.getSplitIds()[0], "0");
         assertEquals(admmReducerContextGroup.getSplitIds()[1], "1");
         assertEquals(admmReducerContextGroup.getSplitIds()[2], "2");
 
         assertEquals(admmReducerContextGroup.getXUpdated()[0][0], 1.0, DELTA);
         assertEquals(admmReducerContextGroup.getXUpdated()[2][1], 2.0, DELTA);
-
-        // verify
     }
 
     private Iterator<Text> getMapperResults() throws IOException {
