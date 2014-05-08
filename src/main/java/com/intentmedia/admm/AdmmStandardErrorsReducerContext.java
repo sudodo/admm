@@ -15,8 +15,10 @@ public class AdmmStandardErrorsReducerContext implements Writable {
 
     @JsonProperty("xwxMatrix")
     private double[][] xwxMatrix;
+
     @JsonProperty("lambdaValue")
     private double lambdaValue;
+
     @JsonProperty("numberOfRows")
     private int numberOfRows;
 

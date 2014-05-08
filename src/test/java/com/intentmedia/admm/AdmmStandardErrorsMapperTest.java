@@ -32,17 +32,22 @@ public class AdmmStandardErrorsMapperTest {
     private static final double[] STORED_Z_INITIAL = {0.5, -3.0, -1.5, 2.0};
     private static final double STORED_LAMBDA_VALUE = 0.5;
     private static final String KEY_VALUE_DELIMITER = "::";
-    private static final double[][] XWX_MATRIX_0 = {{0.06763144071954585, -0.08284966811804867, -0.12989706281952818, -0.23066146342111984},
+
+    private static final double[][] XWX_MATRIX_0 = {
+            {0.06763144071954585, -0.08284966811804867, -0.12989706281952818, -0.23066146342111984},
             {-0.08284966811804867, 0.3818644701861057, 0.651417562984136, 0.8296917505172394},
             {-0.12989706281952818, 0.651417562984136, 1.116703917964576, 1.3968928703103825},
-            {-0.23066146342111984, 0.8296917505172395, 1.3968928703103827, 1.8750515717768312}};
-    private static final double[][] XWX_MATRIX_SAMPLE = {{53.76813981320403, -93.05472384958634, 42.144212149567956, 95.99222757670705, -3.1223365028878605, 10.18846647442964, 38.62849128766009},
+            {-0.23066146342111984, 0.8296917505172395, 1.3968928703103827, 1.8750515717768312}
+    };
+    private static final double[][] XWX_MATRIX_SAMPLE = {
+            {53.76813981320403, -93.05472384958634, 42.144212149567956, 95.99222757670705, -3.1223365028878605, 10.18846647442964, 38.62849128766009},
             {-93.05472384958631, 409.5151027986737, -65.08794369247198, -157.83634015467845, 7.9693897925522466, -20.749865400158356, -66.66605745147577},
             {42.14421214956797, -65.08794369247207, 85.85416324788306, 128.0791011465539, 0.7897265624627079, 7.3775661981834215, 31.13359173100496},
             {95.99222757670702, -157.83634015467854, 128.07910114655388, 224.3419566693007, -2.2838330514063876, 17.47937516296623, 69.76380507025026},
             {-3.1223365028878605, 7.969389792552236, 0.7897265624627076, -2.2838330514063845, 52.373511436250105, -0.974676900896977, -2.4494620874267197},
             {10.188466474429617, -20.749865400158384, 7.377566198183425, 17.47937516296626, -0.9746769008969749, 57.20502803607444, 6.500121920060987},
-            {38.62849128766012, -66.66605745147575, 31.13359173100498, 69.76380507025017, -2.4494620874267197, 6.5001219200609865, 38.62849128766012}};
+            {38.62849128766012, -66.66605745147575, 31.13359173100498, 69.76380507025017, -2.4494620874267197, 6.5001219200609865, 38.62849128766012}
+    };
     private static final double STORED_LAMBDA_VALUE_SAMPLE = 9.999999974752427E-7;
     private static final double[] STORED_Z_INITIAL_SAMPLE = {-5.188975061975105, -0.1604976046531252, -2.1695011339161763, 1.9893523921274305, -0.01838859088842187, 0.24175891777434408, 0.47769845729817656};
     private static final int NUM_TRAINING_EXAMPLES_SAMPLE = 1000;
@@ -50,42 +55,28 @@ public class AdmmStandardErrorsMapperTest {
 
     @Test
     public void testStandardErrorsMapper() throws Exception {
-        // initialize inputs
         LongWritable mapperInputKey = new LongWritable(0);
         List<Text> mapperInputValues = getMapperInputValues();
         List<IntWritable> mapperOutputKeys = getMapperOutputKeys();
         List<Text> mapperOutputValues = getMapperOutputValues();
 
-        // initialize mocks
-        // initialize subject
         TestableAdmmStandardErrorsMapper subject =
                 createSubject(new TestableAdmmStandardErrorsMapper());
 
-        // invoke target
-        // assert
         assertMaps(subject, mapperInputKey, mapperInputValues, mapperOutputKeys, mapperOutputValues);
-
-        // verify
     }
 
     @Test
     public void testWithSampleFileInput() throws Exception {
-        // initialize inputs
         LongWritable mapperInputKey = new LongWritable(0);
         List<Text> mapperInputValues = getMapperInputValuesSample();
         List<IntWritable> mapperOutputKeys = getMapperOutputKeys();
         List<Text> mapperOutputValues = getMapperOutputValuesSample();
 
-        // initialize mocks
-        // initialize subject
         TestableAdmmStandardErrorsMapperSample subject =
                 createSubject(new TestableAdmmStandardErrorsMapperSample());
 
-        // invoke target
-        // assert
         assertMaps(subject, mapperInputKey, mapperInputValues, mapperOutputKeys, mapperOutputValues);
-
-        // verify
     }
 
     private <T extends AdmmStandardErrorsMapper> T createSubject(T result) {
