@@ -105,7 +105,7 @@ public class WholeFileRecordReader implements RecordReader<LongWritable, Text> {
                 resultBuffer.append(lineValue.toString()).append("\n");
                 if (lineSize > maxLineLength) {
                     // line too long. try again
-                    LOG.info("Skipped line of size " + lineSize + " at pos " + (pos - lineSize));
+                    LOG.info(String.format("Skipped line of size %d at pos %d", lineSize, (pos - lineSize)));
                 }
             }
             value.set(resultBuffer.toString());

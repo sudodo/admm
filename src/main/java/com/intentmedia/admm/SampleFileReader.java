@@ -10,20 +10,16 @@ import java.util.regex.Pattern;
 
 public class SampleFileReader {
 
-    private final Pattern compile;
-    private final String separator;
+    private final Pattern pattern;
     private final Set<Integer> columnsToSkip;
 
-    public SampleFileReader() {
-        this.separator = " ";
-        compile = Pattern.compile(" ");
-        this.columnsToSkip = new HashSet<Integer>();
+    public SampleFileReader(String separator, Set<Integer> columnsToSkip) {
+        pattern = Pattern.compile(separator);
+        this.columnsToSkip = new HashSet<Integer>(columnsToSkip);
     }
 
-    public SampleFileReader(String separator, Set<Integer> columnsToSkip) {
-        this.separator = separator;
-        compile = Pattern.compile(separator);
-        this.columnsToSkip = new HashSet<Integer>(columnsToSkip);
+    public SampleFileReader() {
+        this(" ", new HashSet<Integer>());
     }
 
     // read file and return 1d array
@@ -48,7 +44,7 @@ public class SampleFileReader {
             Scanner in = new Scanner(new BufferedInputStream(new FileInputStream(filePath)));
             while (in.hasNext()) {
                 List<Double> rowArrayList = new ArrayList<Double>();
-                String[] stringsInRow = compile.split(in.nextLine());
+                String[] stringsInRow = pattern.split(in.nextLine());
                 for (int colNumber = 0; colNumber < stringsInRow.length; colNumber++) {
                     String featureValue = stringsInRow[colNumber];
                     if (!columnsToSkip.contains(colNumber)) {

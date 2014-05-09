@@ -20,6 +20,7 @@ import static com.intentmedia.admm.AdmmIterationHelper.*;
 
 public class AdmmStandardErrorsMapper extends MapReduceBase
         implements Mapper<LongWritable, Text, IntWritable, Text> {
+
     private static final IntWritable ZERO = new IntWritable(0);
     private static final Logger LOG = Logger.getLogger(AdmmIterationMapper.class.getName());
     private static final float DEFAULT_REGULARIZATION_FACTOR = 0.000001f;
@@ -44,8 +45,7 @@ public class AdmmStandardErrorsMapper extends MapReduceBase
 
         try {
             fs = FileSystem.get(job);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             LOG.log(Level.FINE, e.toString());
         }
 
@@ -55,8 +55,6 @@ public class AdmmStandardErrorsMapper extends MapReduceBase
     protected Map<String, String> getSplitParameters() {
         return readParametersFromHdfs(fs, previousIntermediateOutputLocationPath, iteration);
     }
-
-
 
     @Override
     public void map(LongWritable key, Text value, OutputCollector<IntWritable, Text> output, Reporter reporter)
@@ -82,9 +80,9 @@ public class AdmmStandardErrorsMapper extends MapReduceBase
 
         SparseRealMatrix xtW = new OpenMapRealMatrix(numFeatures, numRows);
         SparseRealMatrix x = new OpenMapRealMatrix(numRows, numFeatures);
-        for(int row = 0; row < numRows; row++) {
-            for(int col = 0; col < numFeatures; col++) {
-                if(aMatrix[row][col] != 0) {
+        for (int row = 0; row < numRows; row++) {
+            for (int col = 0; col < numFeatures; col++) {
+                if (aMatrix[row][col] != 0) {
                     x.setEntry(row, col, aMatrix[row][col]);
                     xtW.setEntry(col, row, aMatrix[row][col] * rowMultipliers[row]);
                 }
@@ -93,8 +91,8 @@ public class AdmmStandardErrorsMapper extends MapReduceBase
 
         RealMatrix xtWX = xtW.multiply(x);
 
-        for(int row = 0; row < numFeatures; row++) {
-            for(int col = 0; col < numFeatures; col++) {
+        for (int row = 0; row < numFeatures; row++) {
+            for (int col = 0; col < numFeatures; col++) {
                 xwxMatrix[row][col] = xtWX.getEntry(row, col);
             }
         }
@@ -104,7 +102,7 @@ public class AdmmStandardErrorsMapper extends MapReduceBase
 
     private double[] getRowMultipliers(double[][] aMatrix, double[] zFinal) {
         double[] rowMultipliers = new double[aMatrix.length];
-        for(int row = 0; row < rowMultipliers.length; row++) {
+        for (int row = 0; row < rowMultipliers.length; row++) {
             double rowProbability = getPredictedProbability(aMatrix, zFinal, row);
             rowMultipliers[row] = rowProbability * (1 - rowProbability);
         }
@@ -114,7 +112,7 @@ public class AdmmStandardErrorsMapper extends MapReduceBase
     private double getPredictedProbability(double[][] aMatrix, double[] zFinal, int row) {
         double[] features = aMatrix[row];
         double dotProduct = 0;
-        for(int i = 0; i < features.length; i++) {
+        for (int i = 0; i < features.length; i++) {
             dotProduct += features[i] * zFinal[i];
         }
         return Math.exp(dotProduct) / (1 + Math.exp(dotProduct));
@@ -132,10 +130,9 @@ public class AdmmStandardErrorsMapper extends MapReduceBase
                     preContext.getPrimalObjectiveValue(),
                     preContext.getRNorm(),
                     preContext.getSNorm());
-        }
-        else {
-            LOG.log(Level.FINE, "Key not found. Split ID: " + splitId + " Split Map: " + splitToParameters.toString());
-            throw new IOException("Key not found.  Split ID: " + splitId + " Split Map: " + splitToParameters.toString());
+        } else {
+            LOG.log(Level.FINE, String.format("Key not found. Split ID: %s Split Map: %s", splitId, splitToParameters.toString()));
+            throw new IOException(String.format("Key not found.  Split ID: %s Split Map: %s", splitId, splitToParameters.toString()));
         }
     }
 }

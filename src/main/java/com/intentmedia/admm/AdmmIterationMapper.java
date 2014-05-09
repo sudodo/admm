@@ -83,7 +83,7 @@ public class AdmmIterationMapper extends MapReduceBase
         }
         AdmmReducerContext reducerContext = localMapperOptimization(mapperContext);
 
-        LOG.info("Iteration " + iteration + "Mapper outputting splitId " + splitId);
+        LOG.info(String.format("Iteration %d Mapper outputting splitId %s", iteration, splitId));
         output.collect(ZERO, new Text(splitId + "::" + admmReducerContextToJson(reducerContext)));
     }
 
@@ -120,8 +120,8 @@ public class AdmmIterationMapper extends MapReduceBase
                     preContext.getSNorm());
         }
         else {
-            LOG.log(Level.FINE, "Key not found. Split ID: " + splitId + " Split Map: " + splitToParameters.toString());
-            throw new IOException("Key not found.  Split ID: " + splitId + " Split Map: " + splitToParameters.toString());
+            LOG.log(Level.FINE, String.format("Key not found. Split ID: %s Split Map: %s", splitId, splitToParameters.toString()));
+            throw new IOException(String.format("Key not found.  Split ID: %s Split Map: %s", splitId, splitToParameters.toString()));
         }
     }
 }

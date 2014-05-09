@@ -18,7 +18,6 @@ public class AdmmResultWriterIteration extends AdmmResultWriter {
         FSDataInputStream in = hdfs.open(hdfsFilePath);
 
         getFSAndWriteFile(conf, in, finalOutputPathFull);
-
     }
 
 }
