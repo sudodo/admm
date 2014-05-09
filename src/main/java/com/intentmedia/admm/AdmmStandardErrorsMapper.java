@@ -56,8 +56,6 @@ public class AdmmStandardErrorsMapper extends MapReduceBase
         return readParametersFromHdfs(fs, previousIntermediateOutputLocationPath, iteration);
     }
 
-
-
     @Override
     public void map(LongWritable key, Text value, OutputCollector<IntWritable, Text> output, Reporter reporter)
             throws IOException {

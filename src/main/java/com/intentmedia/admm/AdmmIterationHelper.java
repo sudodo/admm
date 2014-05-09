@@ -19,9 +19,11 @@ import java.util.regex.Pattern;
 
 public final class AdmmIterationHelper {
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-    private static final Pattern COMPILE = Pattern.compile(",");
     private static final Logger LOG = Logger.getLogger(AdmmIterationHelper.class.getName());
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+    private static final Pattern COMMA_PATTERN = Pattern.compile(",");
     private static final Pattern TAB_PATTERN = Pattern.compile("\t");
     private static final Pattern NEWLINE_PATTERN = Pattern.compile("\\n");
     private static final Pattern SPACE_PATTERN = Pattern.compile("\\s+");
@@ -117,7 +119,7 @@ public final class AdmmIterationHelper {
         if (columnsToExcludeString == null || columnsToExcludeString.isEmpty()) {
             columnsToExcludeArray = new String[0];
         } else {
-            columnsToExcludeArray = COMPILE.split(columnsToExcludeString);
+            columnsToExcludeArray = COMMA_PATTERN.split(columnsToExcludeString);
         }
 
         Set<Integer> columnsToExclude = new HashSet<Integer>();
