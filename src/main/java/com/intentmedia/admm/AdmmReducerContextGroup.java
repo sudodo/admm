@@ -34,7 +34,7 @@ public class AdmmReducerContextGroup {
         String[] result = getNextResult(mapperResults);
         AdmmReducerContext context = jsonToAdmmReducerContext(result[1]);
         String splitId = result[0];
-        logger.info("Iteration " + iteration + " Reducer Getting splitId " + splitId);
+        logger.info(String.format("Iteration %d Reducer Getting splitId %s", iteration, splitId));
 
         rho = context.getRho();
         lambdaValue = context.getLambdaValue();

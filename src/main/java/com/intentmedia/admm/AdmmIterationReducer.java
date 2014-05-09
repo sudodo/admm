@@ -58,7 +58,7 @@ public class AdmmIterationReducer extends MapReduceBase implements Reducer<IntWr
                             context.getRNorm(), context.getSNorm());
             String currentSplitId = splitIds[mapperNumber];
             outputMap.put(currentSplitId, admmMapperContextToJson(admmMapperContext));
-            LOG.info("Iteration " + iteration + " Reducer Setting splitID " + currentSplitId);
+            LOG.info(String.format("Iteration %d Reducer Setting splitID %s", iteration, currentSplitId));
         }
     }
 
@@ -74,8 +74,7 @@ public class AdmmIterationReducer extends MapReduceBase implements Reducer<IntWr
         for (int i = 0; i < numFeatures; i++) {
             if (i == 0 && !regularizeIntercept) {
                 zUpdated[i] = xAverage[i] + uAverage[i];
-            }
-            else {
+            } else {
                 zUpdated[i] = zMultiplier * (xAverage[i] + uAverage[i]);
             }
         }

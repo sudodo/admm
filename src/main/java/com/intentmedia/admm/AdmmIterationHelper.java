@@ -106,7 +106,8 @@ public final class AdmmIterationHelper {
                                     newColumnArrayIndex,
                                     data.length,
                                     data[i].length,
-                                    elements.length));
+                                    elements.length)
+                    );
                     throw e;
                 }
             }
