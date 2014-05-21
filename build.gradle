@@ -34,3 +34,10 @@ configure([jar, fatJar]) {
         attributes 'Implementation-Title': 'ADMM Hadoop Optimizer', 'Implementation-Version': '0.0.1'
     }
 }
+
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}

@@ -71,7 +71,9 @@ public final class AdmmIterationHelper {
             throws ArrayIndexOutOfBoundsException {
         String[] rows = NEWLINE_PATTERN.split(dataString);
         int numRows = rows.length;
+        LOG.info(String.format("Number of rows: %d", numRows));
         int numColumns = SPACE_PATTERN.split(rows[0]).length - columnsToExclude.size();
+        LOG.info(String.format("Number of columns: %d", numRows));
         int interceptOffset = 0;
         if (addIntercept) {
             interceptOffset = 1;
@@ -80,6 +82,8 @@ public final class AdmmIterationHelper {
 
         int[] columnArray = new int[numColumns];
         int newColumnArrayIndex = 0;
+        LOG.info(String.format("About to set up column array indices"));
+
         for (int i = 0; i < SPACE_PATTERN.split(rows[0]).length; i++) {
             if (!columnsToExclude.contains(i)) {
                 columnArray[newColumnArrayIndex] = i;
@@ -87,6 +91,7 @@ public final class AdmmIterationHelper {
             }
         }
 
+        LOG.info(String.format("About to set up data"));
         for (int i = 0; i < numRows; i++) {
             String[] elements = SPACE_PATTERN.split(rows[i]);
             if (addIntercept) {
@@ -112,6 +117,8 @@ public final class AdmmIterationHelper {
                 }
             }
         }
+
+        LOG.info(String.format("About to return data"));
         return data;
     }
 

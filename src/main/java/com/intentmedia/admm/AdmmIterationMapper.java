@@ -68,11 +68,19 @@ public class AdmmIterationMapper extends MapReduceBase
     @Override
     public void map(LongWritable key, Text value, OutputCollector<IntWritable, Text> output, Reporter reporter)
             throws IOException {
+        LOG.info(String.format("Iteration %d Mapper entered map function", iteration));
+
         FileSplit split = (FileSplit) reporter.getInputSplit();
+        LOG.info(String.format("Iteration %d Mapper got input split", iteration));
+
         String splitId = key.get() + "@" + split.getPath();
+        LOG.info(String.format("Iteration %d Mapper got splitId %s", iteration, splitId));
+
         splitId = removeIpFromHdfsFileName(splitId);
+        LOG.info(String.format("Iteration %d Mapper removed ip from hdfs file name splitId %s", iteration, splitId));
 
         double[][] inputSplitData = createMatrixFromDataString(value.toString(), columnsToExclude, addIntercept);
+        LOG.info(String.format("Iteration %d Mapper about to do optimization on splitId %s", iteration, splitId));
 
         AdmmMapperContext mapperContext;
         if (iteration == 0) {
@@ -81,10 +89,20 @@ public class AdmmIterationMapper extends MapReduceBase
         else {
             mapperContext = assembleMapperContextFromCache(inputSplitData, splitId);
         }
+        LOG.info(String.format("Iteration %d Mapper about to do optimization on splitId %s", iteration, splitId));
         AdmmReducerContext reducerContext = localMapperOptimization(mapperContext);
 
         LOG.info(String.format("Iteration %d Mapper outputting splitId %s", iteration, splitId));
         output.collect(ZERO, new Text(splitId + "::" + admmReducerContextToJson(reducerContext)));
+    }
+
+    private String arrayToString(double[] array) {
+        StringBuilder result = new StringBuilder();
+        for(double d: array) {
+            result.append(d);
+            result.append(", ");
+        }
+        return result.toString();
     }
 
     private AdmmReducerContext localMapperOptimization(AdmmMapperContext context) {
@@ -94,9 +112,14 @@ public class AdmmIterationMapper extends MapReduceBase
                         context.getRho(),
                         context.getUInitial(),
                         context.getZInitial());
+        LOG.info(String.format("Rho value: %f", context.getRho()));
+        LOG.info(String.format("UInitial value: %s", arrayToString(context.getUInitial())));
+        LOG.info(String.format("ZInitial value: %s", arrayToString(context.getZInitial())));
+        LOG.info(String.format("XInitial value: %s", arrayToString(context.getXInitial())));
         IOptimizer.Ctx optimizationContext = new IOptimizer.Ctx(context.getXInitial());
         bfgs.minimize(myFunction, optimizationContext);
         double primalObjectiveValue = myFunction.evaluatePrimalObjective(optimizationContext.m_optimumX);
+        LOG.info(String.format("Iteration %d Mapper finished optimization", iteration));
         return new AdmmReducerContext(context.getUInitial(),
                 context.getXInitial(),
                 optimizationContext.m_optimumX,

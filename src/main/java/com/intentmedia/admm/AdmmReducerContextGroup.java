@@ -52,7 +52,11 @@ public class AdmmReducerContextGroup {
 
         while (result != null) {
             splitId = result[0];
+            logger.info(String.format("Iteration %d Reducer Getting splitId %s", iteration, splitId));
             context = jsonToAdmmReducerContext(result[1]);
+            if (context.getXUpdated() == null) {
+                logger.info(result[1]);
+            }
             primalObjectiveValueLoop += context.getPrimalObjectiveValue();
             uInitial[contextNumber] = context.getUInitial();
             xInitial[contextNumber] = context.getXInitial();

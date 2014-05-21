@@ -29,16 +29,16 @@ public class WholeFileRecordReader implements RecordReader<LongWritable, Text> {
     private static final int B3_OFFSET = 8;
     private static final int BITWISE_AND_VALUE = 0xff;
     private CompressionCodecFactory compressionCodecs = null;
-    private long start;
+    private final long start;
+    private final long end;
+    private final int maxLineLength;
     private long pos;
-    private long end;
     private LineReader in;
-    private int maxLineLength;
 
     public WholeFileRecordReader(Configuration job, FileSplit split) throws IOException {
         this.maxLineLength = job.getInt("mapred.linerecordreader.maxlength", Integer.MAX_VALUE);
-        start = split.getStart();
-        end = start + split.getLength();
+        long startTemp = split.getStart();
+        long endTemp = startTemp + split.getLength();
         final Path file = split.getPath();
         compressionCodecs = new CompressionCodecFactory(job);
         final CompressionCodec codec = compressionCodecs.getCodec(file);
@@ -48,29 +48,33 @@ public class WholeFileRecordReader implements RecordReader<LongWritable, Text> {
         FSDataInputStream fileIn = fs.open(split.getPath());
         boolean skipFirstLine = false;
         if (codec != null) {
-            fileIn.seek(split.getLength() - INT_SIZE_IN_BYTES);
-            byte b4 = fileIn.readByte();
-            byte b3 = fileIn.readByte();
-            byte b2 = fileIn.readByte();
-            byte b1 = fileIn.readByte();
-            int fileLength =
-                    ((b1 & BITWISE_AND_VALUE) << B1_OFFSET) | ((b2 & BITWISE_AND_VALUE) << B2_OFFSET) | ((b3 & BITWISE_AND_VALUE) << B3_OFFSET) | (b4 & BITWISE_AND_VALUE);
-            end = start + fileLength;
+            endTemp = startTemp + getUncompressedFileLength(fileIn, split.getLength());
             fileIn.seek(0);
             in = new LineReader(codec.createInputStream(fileIn), job);
         } else {
-            if (start != 0) {
+            if (startTemp != 0) {
                 skipFirstLine = true;
-                --start;
-                fileIn.seek(start);
+                --startTemp;
+                fileIn.seek(startTemp);
             }
             in = new LineReader(fileIn, job);
         }
         if (skipFirstLine) {
             // skip first line and re-establish "start".
-            start += in.readLine(new Text(), 0, (int) Math.min((long) Integer.MAX_VALUE, end - start));
+            startTemp += in.readLine(new Text(), 0, (int) Math.min((long) Integer.MAX_VALUE, endTemp - startTemp));
         }
+        end = endTemp;
+        start = startTemp;
         this.pos = start;
+    }
+
+    private int getUncompressedFileLength(FSDataInputStream fileIn, long uncompressedSize) throws IOException {
+        fileIn.seek(uncompressedSize - INT_SIZE_IN_BYTES);
+        byte b4 = fileIn.readByte();
+        byte b3 = fileIn.readByte();
+        byte b2 = fileIn.readByte();
+        byte b1 = fileIn.readByte();
+        return ((b1 & BITWISE_AND_VALUE) << B1_OFFSET) | ((b2 & BITWISE_AND_VALUE) << B2_OFFSET) | ((b3 & BITWISE_AND_VALUE) << B3_OFFSET) | (b4 & BITWISE_AND_VALUE);
     }
 
     @Override
@@ -83,37 +87,54 @@ public class WholeFileRecordReader implements RecordReader<LongWritable, Text> {
         return new Text();
     }
 
+    private void resetReading() {
+        this.pos = start;
+        if (codec != null) {
+
+        }
+    }
+
     /**
      * Read a line.
      */
     @Override
     public synchronized boolean next(LongWritable key, Text value) throws IOException {
+        int newSize = 0;
+        int numberOfTries = 0;
+
         try {
-            key.set(pos);
-            Text lineValue = new Text();
-            int newSize = 0;
-            StringBuilder resultBuffer = new StringBuilder();
-            while (pos < end) {
-                int lineSize = in.readLine(lineValue,
-                        maxLineLength,
-                        Math.max((int) Math.min(Integer.MAX_VALUE, end - pos), maxLineLength));
-                if (lineSize == 0) {
-                    return newSize > 0;
+            while(newSize == 0 && numberOfTries < 3) {
+                resetReading();
+
+                numberOfTries++;
+                key.set(pos);
+                Text lineValue = new Text();
+                newSize = 0;
+                StringBuilder resultBuffer = new StringBuilder();
+                while (pos < end) {
+                    int lineSize = in.readLine(lineValue,
+                            maxLineLength,
+                            Math.max((int) Math.min(Integer.MAX_VALUE, end - pos), maxLineLength));
+                    if (lineSize == 0) {
+                        return newSize > 0;
+                    }
+                    pos += lineSize;
+                    newSize += lineSize;
+                    resultBuffer.append(lineValue.toString()).append("\n");
+                    if (lineSize > maxLineLength) {
+                        // line too long. try again
+                        LOG.info(String.format("Skipped line of size %d at pos %d", lineSize, (pos - lineSize)));
+                    }
                 }
-                pos += lineSize;
-                newSize += lineSize;
-                resultBuffer.append(lineValue.toString()).append("\n");
-                if (lineSize > maxLineLength) {
-                    // line too long. try again
-                    LOG.info(String.format("Skipped line of size %d at pos %d", lineSize, (pos - lineSize)));
-                }
+                value.set(resultBuffer.toString());
+                lineValue.clear();
             }
-            value.set(resultBuffer.toString());
-            lineValue.clear();
+            LOG.info(String.format("Rastafarianism, Read file with key %d in %d tries", key.get(), numberOfTries));
             return newSize > 0;
-        } catch (IOException ignored) {
+        } catch (IOException e) {
+            LOG.info(String.format("Rastafarianism, Failed to read file with key %d in %d tries", key.get(), numberOfTries));
+            throw new IOException(e);
         }
-        return false;
     }
 
     /**
