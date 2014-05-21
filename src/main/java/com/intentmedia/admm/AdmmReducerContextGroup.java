@@ -4,6 +4,7 @@ import org.apache.hadoop.io.Text;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
@@ -27,6 +28,8 @@ public class AdmmReducerContextGroup {
     private final double rNorm;
     private final double sNorm;
     private final double primalObjectiveValue;
+
+    private static final Logger LOG = Logger.getLogger(AdmmReducerContextGroup.class.getName());
 
     public AdmmReducerContextGroup(Iterator<Text> mapperResults, int numberOfMappers, Logger logger, int iteration)
             throws IOException {
@@ -86,13 +89,31 @@ public class AdmmReducerContextGroup {
     private double[] getAverage(double[][] toAverage) {
         double[] average = new double[toAverage[0].length];
 
-        for (double[] aToAverage : toAverage) {
-            for (int j = 0; j < aToAverage.length; j++) {
-                average[j] += aToAverage[j];
+        try {
+            for (double[] aToAverage : toAverage) {
+                for (int j = 0; j < aToAverage.length; j++) {
+                    average[j] += aToAverage[j];
+                }
+            }
+            for (int j = 0; j < average.length; j++) {
+                average[j] = average[j] / toAverage.length;
             }
         }
-        for (int j = 0; j < average.length; j++) {
-            average[j] = average[j] / toAverage.length;
+        catch (NullPointerException e) {
+            LOG.log(Level.INFO, "splitIds:");
+            for(String s : splitIds) {
+                LOG.log(Level.INFO, s);
+            }
+
+            LOG.log(Level.INFO, "xUpdated:");
+            for(double[] xUpdatedVec : xUpdated) {
+                StringBuffer result = new StringBuffer();
+                for(double xVal : xUpdatedVec) {
+                    result.append(xVal);
+                    result.append(",");
+                }
+                LOG.log(Level.INFO, result.toString());
+            }
         }
 
         return average;
