@@ -82,6 +82,7 @@ public class WholeFileRecordReader implements RecordReader<LongWritable, Text> {
                 --startInit;
                 fileIn.seek(startInit);
             }
+            in = new LineReader(fileIn, job);
         }
         if (skipFirstLine) {
             // skip first line and re-establish "start".
