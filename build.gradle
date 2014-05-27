@@ -19,6 +19,7 @@ dependencies {
     compile group: 'org.codehaus.jackson', name: 'jackson-mapper-asl', version:'1.9.12'
     compile group: 'org.kohsuke.jetbrains', name: 'annotations', version:'9.0'
     compile group: 'args4j', name: 'args4j', version:'2.0.12'
+    compile group: 'org.easymock', name: 'easymock', version:'3.1'
 }
 
 sourceCompatibility = 1.6
