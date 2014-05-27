@@ -48,6 +48,7 @@ public class WholeFileRecordReader implements RecordReader<LongWritable, Text> {
 
         this.maxLineLength = job.getInt("mapred.linerecordreader.maxlength", Integer.MAX_VALUE);
         codec = getCodecFromJob(job);
+        resetReading();
     }
 
     private CompressionCodec getCodecFromJob(Configuration job) {
@@ -113,7 +114,6 @@ public class WholeFileRecordReader implements RecordReader<LongWritable, Text> {
     @Override
     public synchronized boolean next(LongWritable key, Text value) throws IOException {
         int numberOfTries = 0;
-        resetReading();
 
         while (numberOfTries < MAX_READ_TRIES) {
             try {
