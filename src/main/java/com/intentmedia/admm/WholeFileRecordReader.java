@@ -30,8 +30,8 @@ public class WholeFileRecordReader implements RecordReader<LongWritable, Text> {
     private static final int BITWISE_AND_VALUE = 0xff;
     private static final int MAX_READ_TRIES = 3;
     private CompressionCodecFactory compressionCodecs = null;
-    private final int maxLineLength;
     private final CompressionCodec codec;
+    private final int maxLineLength;
     private final Configuration job;
     private final FileSplit split;
     private final Path file;
@@ -39,7 +39,7 @@ public class WholeFileRecordReader implements RecordReader<LongWritable, Text> {
     private long pos;
     private long start;
     private long end;
-    private LineReader in;
+    private LineReader lineReader;
 
     public WholeFileRecordReader(Configuration job, FileSplit split) throws IOException {
         this.job = job;
@@ -47,11 +47,12 @@ public class WholeFileRecordReader implements RecordReader<LongWritable, Text> {
         this.file = split.getPath();
 
         this.maxLineLength = job.getInt("mapred.linerecordreader.maxlength", Integer.MAX_VALUE);
-        final Path file = split.getPath();
-        compressionCodecs = new CompressionCodecFactory(job);
-        codec = compressionCodecs.getCodec(file);
+        codec = getCodecFromJob(job);
+    }
 
-        resetReading();
+    private CompressionCodec getCodecFromJob(Configuration job) {
+        compressionCodecs = new CompressionCodecFactory(job);
+        return compressionCodecs.getCodec(file);
     }
 
     private int getUncompressedFileLength(FSDataInputStream fileIn, long uncompressedSize) throws IOException {
@@ -65,28 +66,31 @@ public class WholeFileRecordReader implements RecordReader<LongWritable, Text> {
     }
 
     private void resetReading() throws IOException {
+        this.close();
+
+        FileSystem fs = file.getFileSystem(job);
+
         long startInit = split.getStart();
         long endInit = startInit + split.getLength();
 
         // open the file and seek to the start of the split
-        FileSystem fs = file.getFileSystem(job);
         FSDataInputStream fileIn = fs.open(split.getPath());
         boolean skipFirstLine = false;
         if (codec != null) {
             endInit = startInit + getUncompressedFileLength(fileIn, split.getLength());
             fileIn.seek(0);
-            in = new LineReader(codec.createInputStream(fileIn), job);
+            lineReader = new LineReader(codec.createInputStream(fileIn), job);
         } else {
             if (startInit != 0) {
                 skipFirstLine = true;
                 --startInit;
                 fileIn.seek(startInit);
             }
-            in = new LineReader(fileIn, job);
+            lineReader = new LineReader(fileIn, job);
         }
         if (skipFirstLine) {
             // skip first line and re-establish "start".
-            startInit += in.readLine(new Text(), 0, (int) Math.min((long) Integer.MAX_VALUE, endInit - startInit));
+            startInit += lineReader.readLine(new Text(), 0, (int) Math.min((long) Integer.MAX_VALUE, endInit - startInit));
         }
         this.start = startInit;
         this.end = endInit;
@@ -108,20 +112,18 @@ public class WholeFileRecordReader implements RecordReader<LongWritable, Text> {
      */
     @Override
     public synchronized boolean next(LongWritable key, Text value) throws IOException {
-        int newSize = 0;
         int numberOfTries = 0;
+        resetReading();
 
-        while (newSize == 0 && numberOfTries < MAX_READ_TRIES) {
+        while (numberOfTries < MAX_READ_TRIES) {
             try {
-                resetReading();
-
                 numberOfTries++;
                 key.set(pos);
                 Text lineValue = new Text();
-                newSize = 0;
+                int newSize = 0;
                 StringBuilder resultBuffer = new StringBuilder();
                 while (pos < end) {
-                    int lineSize = in.readLine(lineValue,
+                    int lineSize = lineReader.readLine(lineValue,
                             maxLineLength,
                             Math.max((int) Math.min(Integer.MAX_VALUE, end - pos), maxLineLength));
                     if (lineSize == 0) {
@@ -137,8 +139,12 @@ public class WholeFileRecordReader implements RecordReader<LongWritable, Text> {
                 }
                 value.set(resultBuffer.toString());
                 lineValue.clear();
+                LOG.info(String.format("Success, read file with key %d in %d tries", key.get(), numberOfTries));
+                return newSize > 0;
             }
             catch (IOException e) {
+                resetReading();
+
                 LOG.info(String.format("Failed to read file with key %d in %d tries", key.get(), numberOfTries));
                 if (numberOfTries == MAX_READ_TRIES) {
                     throw new IOException(e);
@@ -146,7 +152,7 @@ public class WholeFileRecordReader implements RecordReader<LongWritable, Text> {
             }
         }
         LOG.info(String.format("Success, read file with key %d in %d tries", key.get(), numberOfTries));
-        return newSize > 0;
+        return false;
     }
 
     /**
@@ -168,8 +174,8 @@ public class WholeFileRecordReader implements RecordReader<LongWritable, Text> {
 
     @Override
     public synchronized void close() throws IOException {
-        if (in != null) {
-            in.close();
+        if (lineReader != null) {
+            lineReader.close();
         }
     }
 }
