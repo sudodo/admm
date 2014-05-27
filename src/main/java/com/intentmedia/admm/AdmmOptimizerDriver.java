@@ -138,6 +138,7 @@ public class AdmmOptimizerDriver extends Configured implements Tool {
         conf.setBoolean("add.intercept", addIntercept);
         conf.setBoolean("regularize.intercept", regularizeIntercept);
         conf.setFloat("regularization.factor", regularizationFactor);
+        conf.setFloat("mapred.reduce.slowstart.completed.maps", 1.0f);
 
         conf.setMapperClass(AdmmStandardErrorsMapper.class);
         conf.setReducerClass(AdmmStandardErrorsReducer.class);
@@ -173,6 +174,7 @@ public class AdmmOptimizerDriver extends Configured implements Tool {
         conf.setBoolean("add.intercept", addIntercept);
         conf.setBoolean("regularize.intercept", regularizeIntercept);
         conf.setFloat("regularization.factor", regularizationFactor);
+        conf.setFloat("mapred.reduce.slowstart.completed.maps", 1.0f);
 
         conf.setMapperClass(AdmmIterationMapper.class);
         conf.setReducerClass(AdmmIterationReducer.class);
