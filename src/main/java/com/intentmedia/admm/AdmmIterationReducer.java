@@ -37,10 +37,13 @@ public class AdmmIterationReducer extends MapReduceBase implements Reducer<IntWr
 
         AdmmReducerContextGroup context = new AdmmReducerContextGroup(values, numberOfMappers, LOG, iteration);
         setOutputMapperValues(context);
-        output.collect(ZERO, new Text(mapToJson(outputMap)));
 
-        if (context.getRNorm() > THRESHOLD || context.getSNorm() > THRESHOLD) {
-            reporter.getCounter(IterationCounter.ITERATION).increment(1);
+        if(outputMap.size() > 0) {
+            output.collect(ZERO, new Text(mapToJson(outputMap)));
+
+            if (context.getRNorm() > THRESHOLD || context.getSNorm() > THRESHOLD) {
+                reporter.getCounter(IterationCounter.ITERATION).increment(1);
+            }
         }
     }
 
