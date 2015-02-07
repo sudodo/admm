@@ -19,6 +19,9 @@ mode, execute:
 ```bash
 git clone git@github.com:intentmedia/admm.git
 cd admm
+gvm ls gradle
+gvm use gradle 2.2.1
+gradle -v
 gradle jar
 hadoop jar build/libs/admm.jar com.intentmedia.admm.AdmmOptimizerDriver \
 -inputPath src/test/java/com/intentmedia/admm/files/logreg_features \
